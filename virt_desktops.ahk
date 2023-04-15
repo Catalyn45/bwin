@@ -1,6 +1,7 @@
 ; Globals
 DesktopCount = 3 ; Windows starts with 2 desktops at boot
 CurrentDesktop = 1 ; Desktop count is 1-indexed (Microsoft numbers them this way)
+LastDesktop = 2
 ;
 ; This function examines the registry to build an accurate list of the current virtual desktops and which one we're currently on.
 ; Current desktop UUID appears to be in HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\SessionInfo\1\VirtualDesktops
@@ -72,7 +73,7 @@ getSessionId()
 ; This function switches to the desktop number provided.
 ;
 switchDesktopByNumber(targetDesktop) {
-    global CurrentDesktop, DesktopCount
+    global CurrentDesktop, DesktopCount, LastDesktop
     ; Re-generate the list of desktops and where we fit in that. We do this because
     ; the user may have switched desktops via some other means than the script.
     mapDesktopsFromRegistry()
@@ -81,6 +82,12 @@ switchDesktopByNumber(targetDesktop) {
         OutputDebug, [invalid] target: %targetDesktop% current: %CurrentDesktop%
         return
     }
+
+    if (CurrentDesktop == targetDesktop) {
+        return
+    }
+
+    LastDesktop = %CurrentDesktop%
 
     ; Go right until we reach the desktop we want
     while(CurrentDesktop < targetDesktop) {
@@ -104,6 +111,7 @@ OutputDebug, [loading] desktops: %DesktopCount% current: %CurrentDesktop%
 ; User config!
 ; This section binds the key combo to the switch/create/delete actions
 ; Alternate keys for this config. Adding these because DragonFly (python) doesn't send CapsLock correctly.
+; we get the state of alt so we don't need to release the alt before switching to other virt desktop
 #If GetKeyState("LAlt", "P")
 !1::switchDesktopByNumber(1)
 !2::switchDesktopByNumber(2)
@@ -116,4 +124,5 @@ OutputDebug, [loading] desktops: %DesktopCount% current: %CurrentDesktop%
 !9::switchDesktopByNumber(9)
 !l::switchDesktopByNumber(CurrentDesktop + 1)
 !h::switchDesktopByNumber(CurrentDesktop - 1)
+!`::switchDesktopByNumber(LastDesktop)
 #If
