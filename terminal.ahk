@@ -5,7 +5,7 @@ SetWorkingDir C:\Users\user\Desktop
 
 ; Open terminal
 ^!t::
-Run alacritty.lnk
+Run wt
 return
 
 ; Close window with alt + q
